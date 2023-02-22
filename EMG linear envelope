@@ -153,3 +153,21 @@ for name = ["C1_emg.xlsx","C2_emg.xlsx","C3_emg.xlsx"]
 end
     
     
+%RMS to finish linear envelope
+[filterval_rows, filterval_col] = size(filter_vals);
+RMS_index =  1;
+for RMS = 1:filterval_col
+    
+    filt_vals_for_RMS = mean(filter_vals(:,RMS).^2);
+    RMS_EMG_vals = filt_vals_for_RMS*.5;
+    
+    
+    processed_RMS (1, (RMS_index-1)+1) = RMS_EMG_vals;
+    
+    RMS_index = RMS_index+1;
+end
+ 
+
+    
+    
+    
