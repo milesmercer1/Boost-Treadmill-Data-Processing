@@ -1,0 +1,155 @@
+%read in EMG file
+%All EMG trials are 1 minute worth of data
+clear all
+clc
+close (gcf)
+
+%Create file name for indexing
+name_index = 1;
+%constants for indexing
+fprintf('subject 3')
+
+
+%create an area with each file name as a string - MATLAB will not read it
+%unless it is in a string
+for name = ["C1_emg.xlsx","C2_emg.xlsx","C3_emg.xlsx"]
+    
+    %Create index for every sheet, create string
+    sheet_index = 1;
+    for sheet = ["t1", "t2",  "t3","t4","t5","t6","t7","t8"]
+       
+        %Read in data and sheet name    
+        data = xlsread(name,sheet);
+
+        emg_data_raw = data(:, 4:7); 
+        
+        %plot(emg_data)
+        
+        %pause
+        %rectify EMG data -> full wave rectify signal
+        
+        emg_data_raw = rmmissing(emg_data_raw);
+        %emg_data_raw = emg_data_raw(1:120000,:);
+        
+        %remove NaN values
+        
+       
+            
+        
+        
+        
+        
+         
+        %Butterworth bandpass filter, set to cutoff of 30-500 HZ
+        %Nyquist frequency = 2000/2 - normalize signal
+        [row_emg,column_emg] = size(emg_data_raw);
+        %plot(emg_data)
+        
+        %hold on
+        
+        
+        filter_index = 1;
+        %Will filter each column from TA > GC > BF > RF
+        for muscle_sensor = (1:column_emg)
+            %muscle_emg = emg_data(:,muscle_sensor);
+            
+            
+            %first 10 seconds, last 10 seconds of EMG data
+            first_10_emg = emg_data_raw(1:20000,muscle_sensor);
+            last_10_emg = emg_data_raw(end-19999:end,muscle_sensor);
+            emg_reshape = [first_10_emg, last_10_emg];
+            emg_data = reshape(emg_reshape, [], 1);
+            
+            
+            
+            
+            mean_muscle = mean(emg_data);
+            emg_data_muscle(1:40000,1) = emg_data(1:40000,1) - mean_muscle; %demean / remove dc bias
+            plot(emg_data_muscle)
+            title('demeaned EMG data')
+            pause
+            hold on
+            
+            
+            if muscle_sensor == 1
+                name_muscle = "Tibialis Anterior";
+            elseif muscle_sensor == 2
+                name_muscle = "Gastrocnemius";
+            elseif muscle_sensor ==3
+                name_muscle = "Biceps Femoris";
+            elseif muscle_sensor == 4
+                name_muscle = "Rectus Femoris";
+            end
+            
+            
+            
+            emg_data_muscle(1:40000,1) = abs(emg_data_muscle(1:40000,1)); %rectify
+            plot(emg_data_muscle(:,1),'k') %visualize raw data
+            title(name_muscle)
+            pause
+            hold on
+            
+            
+            
+            
+            filter_emg_data(1:40000,1) = my_filt(emg_data_muscle(1:40000,1), 30, 2000, 2); %high pass
+            plot(filter_emg_data,'g')
+            title(name_muscle)
+            pause
+            hold on
+            filter_emg_data = abs(filter_emg_data);
+            
+            
+            
+            
+            filter_emg_data(1:40000,1) = my_filt(filter_emg_data(1:40000,1),500,2000,1); %low pass
+            plot(filter_emg_data,'r')
+            title(name_muscle)
+            pause
+            hold on
+            close gcf
+           
+            
+            
+            
+            
+            
+            
+               
+            
+                    
+           filter_vals (1:40000,(name_index-1)*32+(sheet_index-1)*4+filter_index) = filter_emg_data(1:40000,1); 
+          
+           filter_index = filter_index+1;                          
+           
+        end
+        
+           
+           
+           
+           
+           sheet_index = sheet_index+1;
+    end
+            
+            
+            
+            
+            
+            
+            
+            %plot(filter_vals(1:20000,ii),'g') %visualize filtered data
+            %pause
+            %hold off
+            %(name_index-1)*8+filter_index+sheet_index)
+            
+
+        
+        
+                  
+
+        
+    name_index = name_index+1;
+    
+end
+    
+    
